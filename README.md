@@ -8,6 +8,8 @@
 [![firefox users](https://img.shields.io/amo/users/sourcegraph.svg)](https://addons.mozilla.org/en-US/firefox/addon/sourcegraph/)
 [![firefox rating](https://img.shields.io/amo/rating/sourcegraph.svg)](https://addons.mozilla.org/en-US/firefox/addon/sourcegraph/)
 
+test patch
+
 ## Overview
 
 The Sourcegraph browser extension adds tooltips to code on GitHub, Phabricator, and Bitbucket.
@@ -21,6 +23,8 @@ The tooltips include features like:
 #### 🚀 Install: [**Sourcegraph for Chrome**](https://chrome.google.com/webstore/detail/sourcegraph/dgjhfomjieaadpoljlnidmbgkdffpack) — [**Sourcegraph for Firefox**](https://addons.mozilla.org/en-US/firefox/addon/sourcegraph/)
 
 It works as follows:
+
+Something
 
 - when visiting e.g. https://github.com/..., the extension injects a content script (inject.bundle.js)
 - there is a background script running to access certain chrome APIs, like storage (background.bundle.js)
