@@ -72,5 +72,5 @@ export const diffDomFunctions: DOMFunctions = {
 
         return elem.previousElementSibling ? 'head' : 'base'
     },
-    isFirstCharacterDiffIndicator: () => false,
+    isFirstCharacterDiffIndicator: () => true,
 }

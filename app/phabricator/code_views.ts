@@ -39,29 +39,14 @@ const adjustPosition: PositionAdjuster = ({ direction, codeView, position }) =>
             const documentLineContent = codeElement.textContent!
             const actualLineContent = lines[position.line - 1]
 
-            const convertSpaces = convertSpacesToTabs(
-                actualLineContent,
-                documentLineContent.substr(position.part ? 1 : 0)
-            )
+            const convertSpaces = convertSpacesToTabs(actualLineContent, documentLineContent)
 
             const modifier = direction === AdjustmentDirection.CodeViewToActual ? -1 : 1
-
-            console.log(
-                'convertSpaces',
-                convertSpaces,
-                convertSpaces
-                    ? {
-                          line: position.line,
-                          character:
-                              position.character + spacesToTabsAdjustment(documentLineContent.substr(1)) * modifier,
-                      }
-                    : position
-            )
 
             return convertSpaces
                 ? {
                       line: position.line,
-                      character: position.character + spacesToTabsAdjustment(documentLineContent.substr(1)) * modifier,
+                      character: position.character + spacesToTabsAdjustment(documentLineContent) * modifier,
                   }
                 : position
         })
