@@ -33,7 +33,7 @@ export const diffDomFunctions: DOMFunctions = {
     },
     getLineNumberFromCodeElement: codeElement => {
         let elem: HTMLElement | null = codeElement
-        while (elem && elem.tagName !== 'TH') {
+        while ((elem && elem.tagName !== 'TH') || (elem && !elem.textContent)) {
             elem = elem.previousElementSibling as HTMLElement | null
         }
 
@@ -72,5 +72,20 @@ export const diffDomFunctions: DOMFunctions = {
 
         return elem.previousElementSibling ? 'head' : 'base'
     },
-    isFirstCharacterDiffIndicator: () => true,
+    isFirstCharacterDiffIndicator: (codeElement: HTMLElement) => {
+        const firstChild = codeElement.firstElementChild as HTMLElement
+        if (firstChild.classList.contains('aural-only')) {
+            return true
+        }
+
+        const text = codeElement.textContent || ''
+
+        // Phabricator adds a no-width-space to the beginning of the line in some cases.
+        // We need to strip that and account for it here.
+        if (text.charCodeAt(0) === 8203) {
+            return true
+        }
+
+        return false
+    },
 }

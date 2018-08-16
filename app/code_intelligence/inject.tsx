@@ -19,7 +19,7 @@ import { Observable, of, Subject, Subscription } from 'rxjs'
 import { filter, map, withLatestFrom } from 'rxjs/operators'
 
 import { createJumpURLFetcher } from '../backend/lsp'
-import { fetchHover } from '../backend/lsp'
+import { lspViaAPIXlang } from '../backend/lsp'
 import { eventLogger, sourcegraphUrl } from '../util/context'
 
 export interface CodeHostInfo {
@@ -52,7 +52,7 @@ function createCodeIntelligenceContainer(): { hoverifier: Hoverifier } {
     document.body.appendChild(overlayMount)
     const relativeElement = document.body
 
-    const fetchJumpURL = createJumpURLFetcher(toPrettyBlobURL)
+    const fetchJumpURL = createJumpURLFetcher(lspViaAPIXlang.fetchDefinition, toPrettyBlobURL)
 
     const containerComponentUpdates = new Subject<void>()
 
@@ -69,9 +69,9 @@ function createCodeIntelligenceContainer(): { hoverifier: Hoverifier } {
             location.href = path
         },
         fetchHover: ({ line, character, part, ...rest }) =>
-            fetchHover({ ...rest, position: { line, character } }).pipe(
-                map(hover => (hover ? (hover as HoverMerged) : hover))
-            ),
+            lspViaAPIXlang
+                .fetchHover({ ...rest, position: { line, character } })
+                .pipe(map(hover => (hover ? (hover as HoverMerged) : hover))),
         fetchJumpURL,
         logTelemetryEvent: () => eventLogger.logCodeIntelligenceEvent(),
     })

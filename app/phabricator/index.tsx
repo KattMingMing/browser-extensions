@@ -180,8 +180,8 @@ export function spacesToTabsAdjustment(text: string): number {
 
     // Phabricator adds a no-width-space to the beginning of the line in some cases.
     // We need to strip that and account for it here.
-    if (text.charCodeAt(0) === 8203) {
-        text = text.substr(1)
+    if (suffix.charCodeAt(0) === 8203) {
+        suffix = suffix.substr(1)
         adjustment++
     }
 

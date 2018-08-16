@@ -507,10 +507,15 @@ function convertConduitRepoToRepoDetailsObservable(repo: ConduitRepo): Observabl
             // backwards work around configuration setting to ensure mappings are correct. This logic currently exists
             // in the browser extension options menu.
             const callsignMappings =
-                window.localStorage.PHABRICATOR_CALLSIGN_MAPPINGS || window.PHABRICATOR_CALLSIGN_MAPPINGS
+                window.localStorage.getItem('PHABRICATOR_CALLSIGN_MAPPINGS') || window.PHABRICATOR_CALLSIGN_MAPPINGS
             const details = convertToDetails(repo)
             if (callsignMappings) {
-                for (const mapping of JSON.parse(callsignMappings)) {
+                const mappings =
+                    typeof callsignMappings === 'string'
+                        ? (JSON.parse(callsignMappings) as { path: string; callsign: string }[])
+                        : callsignMappings
+
+                for (const mapping of mappings) {
                     if (mapping.callsign === repo.fields.callsign) {
                         return observer.next({
                             callsign: repo.fields.callsign,
