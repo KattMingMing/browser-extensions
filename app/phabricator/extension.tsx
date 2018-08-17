@@ -17,7 +17,7 @@ function injectModules(): void {
 
     featureFlags.isEnabled('newTooltips').then(enabled => {
         if (enabled) {
-            injectCodeIntelligence({ codeViews: phabCodeViews })
+            injectCodeIntelligence({ name: 'phabricator', codeViews: phabCodeViews })
             return
         }
 

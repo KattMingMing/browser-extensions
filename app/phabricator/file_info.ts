@@ -1,11 +1,12 @@
-import { ContextResolver, HoveredToken, HoveredTokenContext } from '@sourcegraph/codeintellify'
 import { from, Observable, zip } from 'rxjs'
 import { catchError, filter, map, switchMap } from 'rxjs/operators'
 import { DifferentialState, PhabricatorMode } from '.'
+import { FileInfo } from '../code_intelligence/inject'
+import { fetchBlobContentLines } from '../repo/backend'
 import { resolveDiffRev } from './backend'
 import { getFilepathFromFile, getPhabricatorState } from './util'
 
-export const createDifferentialContextResolver = (codeView: HTMLElement): Observable<ContextResolver> =>
+export const resolveDiffFileInfo = (codeView: HTMLElement): Observable<FileInfo> =>
     from(getPhabricatorState(window.location)).pipe(
         filter(state => state !== null && state.mode === PhabricatorMode.Differential),
         map(state => state as DifferentialState),
@@ -67,10 +68,37 @@ export const createDifferentialContextResolver = (codeView: HTMLElement): Observ
                 }))
             )
         }),
-        map(info => (token: HoveredToken): HoveredTokenContext => ({
-            repoPath: token.part === 'base' ? info.baseRepoPath : info.headRepoPath,
-            commitID: token.part === 'base' ? info.baseCommitID : info.headCommitID,
-            filePath: token.part === 'base' ? info.baseFilePath || info.filePath : info.filePath,
-            rev: token.part === 'base' ? info.baseRev : info.headRev,
+        switchMap(info => {
+            const fetchingBaseFile = fetchBlobContentLines({
+                repoPath: info.baseRepoPath,
+                filePath: info.baseFilePath || info.filePath,
+                commitID: info.baseCommitID,
+                rev: info.baseRev,
+            })
+
+            const fetchingHeadFile = fetchBlobContentLines({
+                repoPath: info.headRepoPath,
+                filePath: info.filePath,
+                commitID: info.headCommitID,
+                rev: info.headRev,
+            })
+
+            return zip(fetchingBaseFile, fetchingHeadFile).pipe(
+                map(([baseFileContent, headFileContent]) => ({ ...info, baseFileContent, headFileContent }))
+            )
+        }),
+        map(info => ({
+            repoPath: info.headRepoPath,
+            filePath: info.filePath,
+            commitID: info.headCommitID,
+            rev: info.headRev,
+
+            baseRepoPath: info.baseRepoPath,
+            baseFilePath: info.baseFileContent ? info.baseFilePath || info.filePath : undefined,
+            baseCommitID: info.baseCommitID,
+            baseRev: info.baseRev,
+
+            headHasFileContents: info.headFileContent.length > 0,
+            baseHasFileContents: info.baseFileContent.length > 0,
         }))
     )

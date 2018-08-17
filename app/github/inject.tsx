@@ -316,7 +316,7 @@ function injectCodeSnippetAnnotator(
                 <CodeViewToolbar
                     repoPath={repoPath}
                     filePath={filePath}
-                    baseCommitID={commitID}
+                    commitID={commitID}
                     baseRev={commitID}
                     buttonProps={buttonProps}
                     simpleCXPFns={lspViaAPIXlang}
@@ -523,7 +523,7 @@ function injectBlobAnnotators(): void {
                     <CodeViewToolbar
                         repoPath={repoPath}
                         filePath={filePath!}
-                        baseCommitID={commitID}
+                        commitID={commitID}
                         baseRev={commitID}
                         buttonProps={buttonProps}
                         simpleCXPFns={simpleCXPFns}
@@ -595,8 +595,8 @@ function injectBlobAnnotators(): void {
                         <CodeViewToolbar
                             repoPath={repoPath}
                             filePath={headFilePath}
+                            commitID={resolvedRevSpec.headCommitID}
                             baseCommitID={resolvedRevSpec.baseCommitID}
-                            headCommitID={resolvedRevSpec.headCommitID}
                             buttonProps={buttonProps}
                             simpleCXPFns={simpleCXPFns}
                         />,

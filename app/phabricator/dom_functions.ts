@@ -46,7 +46,6 @@ export const diffDomFunctions: DOMFunctions = {
         const elem = getLineNumberCell(codeElement)
 
         if (elem === null) {
-            console.log('aw fuck', codeElement, elem)
             throw new Error('could not find line number element from code element')
         }
 

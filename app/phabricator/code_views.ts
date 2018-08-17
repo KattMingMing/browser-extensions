@@ -4,7 +4,7 @@ import { Position } from 'vscode-languageserver-types'
 import { CodeViewInfo } from '../code_intelligence/inject'
 import { fetchBlobContentLines } from '../repo/backend'
 import { diffDomFunctions } from './dom_functions'
-import { createDifferentialContextResolver } from './file_info'
+import { resolveDiffFileInfo } from './file_info'
 import { convertSpacesToTabs, spacesToTabsAdjustment } from './index'
 
 function createDifferentialToolbarMount(file: HTMLElement, part: DiffPart): HTMLElement {
@@ -80,24 +80,6 @@ const adjustPosition: PositionAdjuster = ({ direction, codeView, position }) =>
             // Whether the adjustment should add or subtract from the given position.
             const modifier = direction === AdjustmentDirection.CodeViewToActual ? -1 : 1
 
-            if (direction === AdjustmentDirection.CodeViewToActual) {
-                console.log(
-                    Array.from(documentLineContent),
-                    convertSpaces,
-                    modifier,
-                    spacesToTabsAdjustment(documentLineContent),
-                    textContentInfo.adjust,
-                    { line: position.line, character: position.character },
-                    '-->',
-                    convertSpaces
-                        ? adjustCharacter(
-                              position,
-                              (spacesToTabsAdjustment(documentLineContent) + textContentInfo.adjust) * modifier
-                          )
-                        : adjustCharacter(position, textContentInfo.adjust * modifier)
-                )
-            }
-
             return convertSpaces
                 ? adjustCharacter(
                       position,
@@ -111,8 +93,14 @@ export const phabCodeViews: CodeViewInfo[] = [
     {
         selector: '.differential-changeset',
         dom: diffDomFunctions,
-        getToolbarMount: createDifferentialToolbarMount,
-        createContextResolver: createDifferentialContextResolver,
+        resolveFileInfo: resolveDiffFileInfo,
         adjustPosition,
+
+        getToolbarMount: createDifferentialToolbarMount,
+        toolbarButtonProps: {
+            className: 'button button-grey has-icon has-text phui-button-default msl',
+            iconStyle: { marginTop: '-1px', paddingRight: '4px', fontSize: '18px', height: '.8em', width: '.8em' },
+            style: {},
+        },
     },
 ]
