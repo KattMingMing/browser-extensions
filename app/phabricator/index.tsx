@@ -178,13 +178,6 @@ export function spacesToTabsAdjustment(text: string): number {
     let suffix = text
     let adjustment = 0
 
-    // Phabricator adds a no-width-space to the beginning of the line in some cases.
-    // We need to strip that and account for it here.
-    if (suffix.charCodeAt(0) === 8203) {
-        suffix = suffix.substr(1)
-        adjustment++
-    }
-
     while (suffix.length >= 2 && suffix.startsWith('  ')) {
         ++adjustment
         suffix = suffix.substr(2)

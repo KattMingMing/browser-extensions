@@ -46,6 +46,13 @@ const getTextContent = (element: HTMLElement): { textContent: string; adjust: nu
         textContent = textContent.substr(pre.length - adjust)
     }
 
+    // Phabricator adds a no-width-space to the beginning of the line in some cases.
+    // We need to strip that and account for it here.
+    if (textContent.charCodeAt(0) === 8203) {
+        textContent = textContent.substr(1)
+        adjust++
+    }
+
     return { textContent, adjust }
 }
 
@@ -57,7 +64,7 @@ const adjustCharacter = (position: Position, adjustment: number): Position => ({
 const adjustPosition: PositionAdjuster = ({ direction, codeView, position }) =>
     fetchBlobContentLines(position).pipe(
         map(lines => {
-            const codeElement = diffDomFunctions.getCodeElementFromLineNumber(codeView, position.line)
+            const codeElement = diffDomFunctions.getCodeElementFromLineNumber(codeView, position.line, position.part)
             if (!codeElement) {
                 throw new Error('(adjustPosition) could not find code element for line provided')
             }
@@ -72,6 +79,24 @@ const adjustPosition: PositionAdjuster = ({ direction, codeView, position }) =>
 
             // Whether the adjustment should add or subtract from the given position.
             const modifier = direction === AdjustmentDirection.CodeViewToActual ? -1 : 1
+
+            if (direction === AdjustmentDirection.CodeViewToActual) {
+                console.log(
+                    Array.from(documentLineContent),
+                    convertSpaces,
+                    modifier,
+                    spacesToTabsAdjustment(documentLineContent),
+                    textContentInfo.adjust,
+                    { line: position.line, character: position.character },
+                    '-->',
+                    convertSpaces
+                        ? adjustCharacter(
+                              position,
+                              (spacesToTabsAdjustment(documentLineContent) + textContentInfo.adjust) * modifier
+                          )
+                        : adjustCharacter(position, textContentInfo.adjust * modifier)
+                )
+            }
 
             return convertSpaces
                 ? adjustCharacter(

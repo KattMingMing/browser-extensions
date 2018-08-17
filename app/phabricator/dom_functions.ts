@@ -1,5 +1,13 @@
 import { DOMFunctions } from '@sourcegraph/codeintellify'
 
+const getLineNumberCell = (codeElement: HTMLElement) => {
+    let elem: HTMLElement | null = codeElement
+    while ((elem && elem.tagName !== 'TH') || (elem && !elem.textContent)) {
+        elem = elem.previousElementSibling as HTMLElement | null
+    }
+    return elem
+}
+
 /**
  * Implementations of the DOM functions for diff code views on Phabricator
  */
@@ -10,7 +18,10 @@ export const diffDomFunctions: DOMFunctions = {
         }
 
         const td = target.closest('td')
-        if (td && (td.classList.contains('show-more') || td.classList.contains('show-context'))) {
+        if (
+            td &&
+            (td.classList.contains('show-more') || td.classList.contains('show-context') || !getLineNumberCell(td))
+        ) {
             return null
         }
 
@@ -32,12 +43,10 @@ export const diffDomFunctions: DOMFunctions = {
         return null
     },
     getLineNumberFromCodeElement: codeElement => {
-        let elem: HTMLElement | null = codeElement
-        while ((elem && elem.tagName !== 'TH') || (elem && !elem.textContent)) {
-            elem = elem.previousElementSibling as HTMLElement | null
-        }
+        const elem = getLineNumberCell(codeElement)
 
         if (elem === null) {
+            console.log('aw fuck', codeElement, elem)
             throw new Error('could not find line number element from code element')
         }
 
@@ -75,14 +84,6 @@ export const diffDomFunctions: DOMFunctions = {
     isFirstCharacterDiffIndicator: (codeElement: HTMLElement) => {
         const firstChild = codeElement.firstElementChild as HTMLElement
         if (firstChild.classList.contains('aural-only')) {
-            return true
-        }
-
-        const text = codeElement.textContent || ''
-
-        // Phabricator adds a no-width-space to the beginning of the line in some cases.
-        // We need to strip that and account for it here.
-        if (text.charCodeAt(0) === 8203) {
             return true
         }
 
